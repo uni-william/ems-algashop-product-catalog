@@ -6,7 +6,7 @@ Contract.make {
     request {
         method GET()
         headers {
-            accept 'application/json'
+            accept "application/json"
         }
         url("/api/v1/products") {
             queryParameters {
@@ -15,7 +15,7 @@ Contract.make {
             }
         }
         response {
-            status(200)
+            status 200
             headers {
                 contentType "application/json"
             }
@@ -25,38 +25,37 @@ Contract.make {
                     totalElements: 2,
                     totalPages: 1,
                     content: [
-                            [
-                                id: anyUuid(),
-                                addedAt: anyIso8601WithOffset(),
-                                name: "Notebook X11",
-                                brand: "Deep Diver",
-                                regularPrice: 1500.00,
-                                salePrice: 1000.00,
-                                inStock: true,
-                                enabled: true,
-                                category: [
-                                        id: anyUuid(),
-                                        name: "Notebook"
-                                ],
-                                description: "A Gamer Notebook"
+                        [
+                            id: anyUuid(),
+                            addedAt: anyIso8601WithOffset(),
+                            name: "Notebook X11",
+                            brand: "Deep Diver",
+                            regularPrice: 1500.00,
+                            salePrice: 1000.00,
+                            inStock: true,
+                            enabled: true,
+                            category: [
+                                    id: anyUuid(),
+                                    name: "Notebook"
                             ],
-                            [   id: anyUuid(),
-                                addedAt: anyIso8601WithOffset(),
-                                name: "Desktop I9000",
-                                brand: "Deep Diver",
-                                regularPrice: 3500.00,
-                                salePrice: 3000.00,
-                                inStock: true,
-                                enabled: true,
-                                category: [
-                                        id: anyUuid(),
-                                        name: "Desktop"
-                                ],
-                                description: "A Gamer Notebook"
-                            ]
-
+                            description: "A Gamer Notebook"
+                        ],
+                        [
+                            id: anyUuid(),
+                            addedAt: anyIso8601WithOffset(),
+                            name: "Desktop I9000",
+                            brand: "Deep Diver",
+                            regularPrice: 3500.00,
+                            salePrice: 3000.00,
+                            inStock: false,
+                            enabled: true,
+                            category: [
+                                    id: anyUuid(),
+                                    name: "Desktop"
+                            ],
+                            description: "A Gamer Desktop"
+                        ]
                     ]
-
             ])
         }
     }
