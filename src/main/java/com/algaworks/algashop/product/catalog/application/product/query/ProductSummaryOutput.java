@@ -1,4 +1,4 @@
-package com.algaworks.algashop.product.catalog.presentation;
+package com.algaworks.algashop.product.catalog.application.product.query;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -13,7 +13,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProductDetailOutput {
+public class ProductSummaryOutput {
     private UUID id;
     private OffsetDateTime addedAt;
     private String name;
@@ -23,5 +23,12 @@ public class ProductDetailOutput {
     private Boolean inStock;
     private Boolean enabled;
     private CategoryMinimalOutput category;
-    private String description;
+
+    private String shortDescription;
+
+    private String slug;
+    private Boolean hasDiscount;
+
+    private Integer quantityInStock;
+    private Integer discountPercentageRounded;
 }
