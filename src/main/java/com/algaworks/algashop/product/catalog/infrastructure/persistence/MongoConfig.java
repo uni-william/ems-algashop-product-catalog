@@ -1,11 +1,13 @@
 package com.algaworks.algashop.product.catalog.infrastructure.persistence;
 
-import com.mongodb.lang.Nullable;
 import org.bson.UuidRepresentation;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.mongodb.autoconfigure.MongoClientSettingsBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.data.mongodb.MongoDatabaseFactory;
+import org.springframework.data.mongodb.MongoTransactionManager;
 import org.springframework.data.mongodb.core.convert.MongoCustomConversions;
 
 import java.time.OffsetDateTime;
@@ -28,6 +30,11 @@ public class MongoConfig {
         );
     }
 
+    @Bean
+    public MongoTransactionManager mongoTransactionManager(MongoDatabaseFactory factory) {
+        return new MongoTransactionManager(factory);
+    }
+
     public static class OffsetDateTimeReadConverter implements Converter<Date, OffsetDateTime> {
         @Override
         public @Nullable OffsetDateTime convert(Date source) {
@@ -41,4 +48,5 @@ public class MongoConfig {
             return Date.from(source.toInstant());
         }
     }
+
 }

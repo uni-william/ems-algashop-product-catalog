@@ -25,6 +25,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.documentationConfiguration;
+
 @WebMvcTest(controllers = ProductController.class)
 @ExtendWith(RestDocumentationExtension.class)
 public class ProductBase {
@@ -47,13 +49,14 @@ public class ProductBase {
     @BeforeEach
     void setUp(RestDocumentationContextProvider documentationContextProvider) {
         RestAssuredMockMvc.mockMvc(MockMvcBuilders.webAppContextSetup(context)
-                        .apply(MockMvcRestDocumentation.documentationConfiguration(documentationContextProvider)
-                                .snippets().withTemplateFormat(TemplateFormats.asciidoctor())
-                                .and().operationPreprocessors()
-                                .withResponseDefaults(Preprocessors.prettyPrint()))
-                        .alwaysDo(MockMvcRestDocumentation.document("{ClassName}/{methodName}"))
+                .apply(documentationConfiguration(documentationContextProvider)
+                        .snippets().withTemplateFormat(TemplateFormats.asciidoctor())
+                        .and().operationPreprocessors()
+                        .withResponseDefaults(Preprocessors.prettyPrint()))
+                .alwaysDo(MockMvcRestDocumentation.document("{ClassName}/{methodName}"))
                 .defaultResponseCharacterEncoding(StandardCharsets.UTF_8)
-                .build());
+                .build()
+        );
 
         RestAssuredMockMvc.enableLoggingOfRequestAndResponseIfValidationFails();
 
@@ -77,14 +80,13 @@ public class ProductBase {
     }
 
     private void mockFilterProducts() {
-        Mockito.when(productQueryService.filter(
-                Mockito.anyInt(), Mockito.anyInt()))
+        Mockito.when(productQueryService.filter(Mockito.any()))
                 .then((answer)-> {
-                    Integer size = answer.getArgument(0);
+                    ProductFilter filter = answer.getArgument(0);
 
                     return PageModel.<ProductDetailOutput>builder()
                             .number(0)
-                            .size(size)
+                            .size(filter.getSize())
                             .totalPages(1)
                             .totalElements(2)
                             .content(

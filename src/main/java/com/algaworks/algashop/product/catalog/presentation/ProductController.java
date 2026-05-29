@@ -7,7 +7,6 @@ import com.algaworks.algashop.product.catalog.application.product.query.ProductD
 import com.algaworks.algashop.product.catalog.application.product.query.ProductFilter;
 import com.algaworks.algashop.product.catalog.application.product.query.ProductQueryService;
 import com.algaworks.algashop.product.catalog.application.product.query.ProductSummaryOutput;
-
 import com.algaworks.algashop.product.catalog.domain.model.category.CategoryNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,7 @@ public class ProductController {
         UUID productId;
         try {
             productId = productManagementApplicationService.create(input);
-        }catch (CategoryNotFoundException e){
+        } catch (CategoryNotFoundException e) {
             throw new UnprocessableContentException(e.getMessage(), e);
         }
         return productQueryService.findById(productId);
@@ -60,10 +59,21 @@ public class ProductController {
         productManagementApplicationService.enable(productId);
     }
 
-
     @GetMapping
-    public PageModel<ProductSummaryOutput> filter(ProductFilter  filter) {
-        return productQueryService.filter(filter);
+    public PageModel<ProductSummaryOutput> filter(ProductFilter productFilter) {
+        return productQueryService.filter(productFilter);
+    }
+
+    @PostMapping("/{productId}/restock")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void restock(@PathVariable UUID productId, @RequestBody @Valid ProductQuantityModel productQuantityModel) {
+        productManagementApplicationService.restock(productId, productQuantityModel.getQuantity());
+    }
+
+    @PostMapping("/{productId}/withdraw")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void withdraw(@PathVariable UUID productId, @RequestBody @Valid ProductQuantityModel productQuantityModel) {
+        productManagementApplicationService.withdraw(productId, productQuantityModel.getQuantity());
     }
 
 }
