@@ -10,14 +10,18 @@ import com.algaworks.algashop.product.catalog.application.product.query.ProductS
 import com.algaworks.algashop.product.catalog.domain.model.category.CategoryNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class ProductController {
 
     private final ProductQueryService productQueryService;
@@ -26,25 +30,38 @@ public class ProductController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ProductDetailOutput create(@RequestBody @Valid ProductInput input) {
-        UUID productId;
         try {
-            productId = productManagementApplicationService.create(input);
+            return productManagementApplicationService.create(input);
         } catch (CategoryNotFoundException e) {
             throw new UnprocessableContentException(e.getMessage(), e);
         }
-        return productQueryService.findById(productId);
     }
 
     @GetMapping("/{productId}")
-    public ProductDetailOutput findById(@PathVariable UUID productId) {
-        return productQueryService.findById(productId);
+    public ResponseEntity<ProductDetailOutput> findById(@PathVariable UUID productId) {
+/*
+        if (productId.equals(UUID.fromString("5805e415-1ca0-45e2-9764-6fd5d1eb2339"))) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        if (Math.random() < 0.8) {
+            try {
+                Thread.sleep(Duration.ofSeconds(20));
+            } catch (Exception e) {}
+        }
+*/
+        ProductDetailOutput product = productQueryService.findById(productId);
+        return ResponseEntity.ok()
+                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(1)).cachePublic())
+                .eTag("product:id:" + product.getId() + ":v:" + product.getVersion())
+                .lastModified(product.getUpdatedAt().toInstant())
+                .body(product);
     }
 
     @PutMapping("/{productId}")
     public ProductDetailOutput update(@PathVariable UUID productId,
                                       @RequestBody @Valid ProductInput input) {
-        productManagementApplicationService.update(productId, input);
-        return productQueryService.findById(productId);
+        return productManagementApplicationService.update(productId, input);
     }
 
     @DeleteMapping("/{productId}/enable")

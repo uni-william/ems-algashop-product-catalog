@@ -1,11 +1,15 @@
 package com.algaworks.algashop.product.catalog.application.product.management;
 
+import com.algaworks.algashop.product.catalog.application.product.query.ProductDetailOutput;
+import com.algaworks.algashop.product.catalog.application.utility.Mapper;
 import com.algaworks.algashop.product.catalog.domain.model.category.Category;
 import com.algaworks.algashop.product.catalog.domain.model.category.CategoryNotFoundException;
 import com.algaworks.algashop.product.catalog.domain.model.category.CategoryRepository;
 import com.algaworks.algashop.product.catalog.domain.model.product.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,26 +25,21 @@ public class ProductManagementApplicationService {
 
     private final StockService stockService;
 
-    public UUID create(ProductInput input) {
+    private final Mapper mapper;
+
+    @CachePut(cacheNames = "algashop:products:v1", key = "#result.id",
+            condition = "#input.enabled == true")
+    public ProductDetailOutput create(ProductInput input) {
         Product product = mapToProduct(input);
         productRepository.save(product);
-        return product.getId();
+        return mapper.convert(product, ProductDetailOutput.class);
     }
 
-    private Product mapToProduct(ProductInput input) {
-        Category category = findCategory(input.getCategoryId());
-        return Product.builder()
-                .name(input.getName())
-                .brand(input.getBrand())
-                .description(input.getDescription())
-                .regularPrice(input.getRegularPrice())
-                .salePrice(input.getSalePrice())
-                .enabled(input.getEnabled())
-                .category(category)
-                .build();
-    }
-
-    public void update(UUID productId, ProductInput input) {
+    @CachePut(cacheNames = "algashop:products:v1", key = "#productId",
+            condition = "#input.enabled == true")
+    @CacheEvict(cacheNames = "algashop:products:v1", key = "#productId",
+            condition = "#input.enabled == false")
+    public ProductDetailOutput update(UUID productId, ProductInput input) {
         Product product = findProduct(productId);
         Category category = findCategory(input.getCategoryId());
 
@@ -48,8 +47,13 @@ public class ProductManagementApplicationService {
         product.setCategory(category);
 
         productRepository.save(product);
+
+        return mapper.convert(product, ProductDetailOutput.class);
     }
 
+
+
+    @CacheEvict(cacheNames = "algashop:products:v1", key = "#productId")
     public void disable(UUID productId) {
         Product product = findProduct(productId);
         product.disable();
@@ -74,6 +78,19 @@ public class ProductManagementApplicationService {
         Product product = findProduct(productId);
         StockMovement movement = stockService.withdraw(product, quantity);
         stockMovementRepository.save(movement);
+    }
+
+    private Product mapToProduct(ProductInput input) {
+        Category category = findCategory(input.getCategoryId());
+        return Product.builder()
+                .name(input.getName())
+                .brand(input.getBrand())
+                .description(input.getDescription())
+                .regularPrice(input.getRegularPrice())
+                .salePrice(input.getSalePrice())
+                .enabled(input.getEnabled())
+                .category(category)
+                .build();
     }
 
     private void updateProduct(Product product, ProductInput input) {
