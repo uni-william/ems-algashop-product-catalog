@@ -48,7 +48,7 @@ public class ProductController {
         log.info("Finding product by ID {}", productId);
         ProductDetailOutput product = productQueryService.findById(productId);
         return ResponseEntity.ok()
-                .cacheControl(CacheControl.maxAge(Duration.ofMinutes(1)).cachePublic())
+                .cacheControl(CacheControl.noCache())
                 .eTag("product:id:" + product.getId() + ":v:" + product.getVersion())
                 .lastModified(product.getUpdatedAt().toInstant())
                 .body(product);
