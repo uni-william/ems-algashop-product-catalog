@@ -1,10 +1,12 @@
 package com.algaworks.algashop.product.catalog.infrastructure.listener.product;
 
-import com.algaworks.algashop.product.catalog.application.IntegrationEventPublisher;
+import com.algaworks.algashop.product.catalog.application.product.event.*;
+import com.algaworks.algashop.product.catalog.application.utility.Mapper;
 import com.algaworks.algashop.product.catalog.domain.model.product.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -12,48 +14,54 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProductEventListener {
 
-    private final IntegrationEventPublisher integrationEventPublisher;
+    private final ProductIntegrationEventPublisher integrationEventPublisher;
+    private final Mapper mapper;
 
     @EventListener(ProductPriceChangedEvent.class)
+    @Async
     public void handle(ProductPriceChangedEvent event) {
         log.info("ProductPriceChangedEvent " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+        ProductPriceChangedIntegrationEvent integrationEvent = mapper.convert(event, ProductPriceChangedIntegrationEvent.class);
+        integrationEventPublisher.send(integrationEvent);
     }
 
     @EventListener(ProductPlacedOnSaleEvent.class)
     public void handle(ProductPlacedOnSaleEvent event) {
         log.info("ProductPlacedOnSaleEvent " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+//        integrationEventPublisher.send(event, event.getProductId().toString(),"product-catalog.product.events");
     }
 
     @EventListener(ProductAddedEvent.class)
     public void handle(ProductAddedEvent event) {
         log.info("ProductAddedEvent " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+        ProductAddedIntegrationEvent integrationEvent = mapper.convert(event, ProductAddedIntegrationEvent.class);
+        integrationEventPublisher.send(integrationEvent);
     }
 
     @EventListener(ProductDelistedEvent.class)
-    public void handle(ProductDelistedEvent  event) {
+    public void handle(ProductDelistedEvent event) {
         log.info("ProductDelistedEvent  " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+        var integrationEvent = mapper.convert(event, ProductDelistedIntegrationEvent.class);
+        integrationEventPublisher.send(integrationEvent);
     }
 
     @EventListener(ProductListedEvent.class)
     public void handle(ProductListedEvent event) {
         log.info("ProductListedEvent " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+        var integrationEvent = mapper.convert(event, ProductListedIntegrationEvent.class);
+        integrationEventPublisher.send(integrationEvent);
     }
 
     @EventListener(ProductRestockedEvent.class)
     public void handle(ProductRestockedEvent event) {
         log.info("ProductRestockedEvent  " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+//        integrationEventPublisher.send(event, event.getProductId().toString(),"product-catalog.product.events");
     }
 
     @EventListener(ProductSoldOutEvent.class)
     public void handle(ProductSoldOutEvent event) {
         log.info("ProductSoldOutEvent " + event);
-        integrationEventPublisher.send(event, "product-catalog.product.events");
+//        integrationEventPublisher.send(event, event.getProductId().toString(),"product-catalog.product.events");
     }
 
 }
